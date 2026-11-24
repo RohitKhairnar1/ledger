@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ledger">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Ledger</title>
+<style>
+:root{--bg:#000;--card:#111;--line:#262626;--tx:#fff;--mu:#888;--g:#4caf83;--r:#d9696b;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Inter",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.side{position:fixed;left:0;top:0;bottom:0;width:216px;border-right:1px solid var(--line);padding:calc(28px + env(safe-area-inset-top,0px)) 14px 20px;display:flex;flex-direction:column;gap:2px;z-index:5}
+.side .logo{font-weight:600;font-size:17px;letter-spacing:-.01em;padding:0 10px 22px}
+.side a{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:8px;color:var(--mu);font-size:14px}
+.side a:hover{color:#fff}.side a.on{background:var(--card);color:#fff}
+.side svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sh{display:none}
+main{margin-left:216px;max-width:940px;padding:calc(40px + env(safe-area-inset-top,0px)) 28px 80px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:0}
+h2{font-size:12px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin:30px 0 12px}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;min-height:40px;white-space:nowrap}
+.btn:hover{border-color:#666}
+.btn.pri{background:#fff;color:#000;border-color:#fff;font-weight:500}
+.btn.in{color:var(--g);border-color:#1f4a37}.btn.out{color:var(--r);border-color:#552628}
+.btn.dng{color:var(--r)}.btn.sm{min-height:32px;padding:4px 10px;font-size:13px;color:var(--mu)}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card .n{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-top:2px}
+.l,.t2{color:var(--mu);font-size:12.5px}
+.gr{color:var(--g)}.rd{color:var(--r)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.chip{background:none;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:13px;color:var(--mu);min-height:32px}
+.chip.on{background:#fff;color:#000;border-color:#fff}
+.chips input[type=date]{width:auto}
+input,select,textarea{width:100%;background:#000;border:1px solid var(--line);border-radius:8px;padding:9px 11px;outline:none;min-height:40px}
+input:focus,select:focus,textarea:focus{border-color:#777}
+.search{margin-bottom:12px}
+.list{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.row{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.row:last-child{border:0}.row:hover{background:#171717}
+.rl{min-width:0}.t1{font-weight:500;overflow:hidden;text-overflow:ellipsis}
+.amt{text-align:right;font-weight:500;white-space:nowrap}.amt .t2{font-weight:400}
+.amt.g2,.g2{color:var(--g)}.amt.r2,.r2{color:var(--r)}
+.low{font-size:11px;color:var(--r);border:1px solid #552628;border-radius:99px;padding:1px 7px;margin-left:6px;font-weight:400}
+.empty{padding:36px 16px;text-align:center;color:var(--mu)}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:9px 14px;color:var(--mu);margin-bottom:-1px}
+.tab.on{color:#fff;border-color:#fff}
+.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}.kv:last-child{border:0}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;width:100%;max-width:440px;max-height:92vh;overflow:auto}
+.modal h3{margin:0 0 6px;font-size:17px}
+.modal label{display:block;color:var(--mu);font-size:12px;margin:13px 0 5px}
+.tot{margin-top:12px;font-weight:600}
+.err{color:var(--r);font-size:13px;min-height:18px;margin-top:10px}
+.mact{display:flex;gap:8px;margin-top:10px;align-items:center}.sp{flex:1}
+.note{color:var(--mu);font-size:13px;margin:6px 0}
+@media(max-width:820px){
+.side{top:auto;width:auto;right:0;bottom:0;flex-direction:row;border:0;border-top:1px solid var(--line);background:#000;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));gap:0;justify-content:space-around}
+.side .logo{display:none}.side a{flex-direction:column;gap:2px;padding:4px 2px;font-size:10px;flex:1;align-items:center;min-width:0}
+.lg{display:none}.sh{display:inline}
+main{margin:0;padding:calc(24px + env(safe-area-inset-top,0px)) 16px 100px}
+h1{font-size:23px}}
+</style>
+</head>
+<body>
+<nav class="side" id="nav"></nav><main id="app"></main>
+<datalist id="dc"></datalist><datalist id="ds"></datalist>
+<datalist id="du"><option value="piece"><option value="unit"><option value="box"><option value="kg"><option value="litre"><option value="metre"><option value="dozen"><option value="pack"></datalist>
+<script>
+const KEY='ledger.v1',MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],METH=['Cash','Bank','UPI'].map(m=>[m,m]);
+const blank=()=>({products:[],purchases:[],sales:[],money:[],transfers:[],parties:[],audit:[],set:{name:'My Business',cur:'₹',openCash:0,openBank:0}});
+let D=blank();
+(function(){for(const k of [KEY,KEY+'.bak']){try{const r=localStorage.getItem(k);if(r){D=Object.assign(blank(),JSON.parse(r));return}}catch(e){}}})();
+function save(){try{const p=localStorage.getItem(KEY);if(p)localStorage.setItem(KEY+'.bak',p);localStorage.setItem(KEY,JSON.stringify(D))}catch(e){alert('Could not save. Storage may be full or blocked. Download a backup from Settings.')}}
+const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0'),uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const r2=n=>Math.round((+n+Number.EPSILON)*100)/100,num=v=>{const n=parseFloat(v);return isNaN(n)?0:n},n3=v=>(Math.round(v*1000)/1000).toLocaleString('en-IN');
+const money=n=>D.set.cur+' '+r2(n).toLocaleString('en-IN',{maximumFractionDigits:2});
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),today=()=>fmt(new Date());
+const fd=s=>{const p=s.split('-');return p[2]+' '+MON[p[1]-1]+' '+p[0].slice(2)};
+const key=s=>(s||'').trim().toLowerCase(),cap=s=>s[0].toUpperCase()+s.slice(1);
+const upsert=(a,o)=>{const i=a.findIndex(z=>z.id===o.id);i<0?a.push(o):a[i]=o},del=(a,id)=>{const i=a.findIndex(z=>z.id===id);if(i>=0)a.splice(i,1)};
+/* date ranges */
+const R={dash:{m:'month'},tx:{m:'all'},rep:{m:'month'}};
+function rng(r){const t=new Date(),y=t.getFullYear(),m=t.getMonth(),d=t.getDate(),w=(t.getDay()+6)%7;
+if(r.m==='today')return[fmt(t),fmt(t)];if(r.m==='week')return[fmt(new Date(y,m,d-w)),fmt(new Date(y,m,d-w+6))];
+if(r.m==='month')return[fmt(new Date(y,m,1)),fmt(new Date(y,m+1,0))];if(r.m==='year')return[y+'-01-01',y+'-12-31'];
+if(r.m==='custom')return[r.from||'0000-00-00',r.to||'9999-99-99'];return['0000-00-00','9999-99-99']}
+const inR=(k,date)=>{const[a,b]=rng(R[k]);return date>=a&&date<=b};
+const rbar=k=>'<div class="chips">'+[['today','Today'],['week','This week'],['month','This month'],['year','This year'],['custom','Custom'],['all','All time']].map(c=>'<button class="chip'+(R[k].m===c[0]?' on':'')+'" data-a="rng" data-x="'+k+':'+c[0]+'">'+c[1]+'</button>').join('')+(R[k].m==='custom'?'<input type="date" data-rf="'+k+':from" value="'+(R[k].from||'')+'"><input type="date" data-rf="'+k+':to" value="'+(R[k].to||'')+'">':'')+'</div>';
+/* calculations (everything derived from records, so edits/deletes reverse automatically) */
+const prod=id=>D.products.find(p=>p.id===id),ac=m=>m==='Cash'?'cash':'bank';
+function stock(id){const p=prod(id);if(!p)return 0;let s=+p.open||0;D.purchases.forEach(x=>{if(x.pid===id)s+=x.qty});D.sales.forEach(x=>{if(x.pid===id)s-=x.qty});return Math.round(s*1000)/1000}
+function bal(){const b={cash:+D.set.openCash||0,bank:+D.set.openBank||0};
+D.money.forEach(x=>b[ac(x.method)]+=x.type==='in'?x.amount:-x.amount);D.sales.forEach(x=>b[ac(x.method)]+=x.paid);D.purchases.forEach(x=>b[ac(x.method)]-=x.paid);
+D.transfers.forEach(x=>{b[x.from]-=x.amount;b[x.to]+=x.amount});b.cash=r2(b.cash);b.bank=r2(b.bank);b.total=r2(b.cash+b.bank);return b}
+function flow(k){let i=0,o=0;D.money.forEach(x=>{if(inR(k,x.date))x.type==='in'?i+=x.amount:o+=x.amount});D.sales.forEach(x=>{if(inR(k,x.date))i+=x.paid});D.purchases.forEach(x=>{if(inR(k,x.date))o+=x.paid});return[r2(i),r2(o)]}
+function pstats(type){const m={},C=type==='customer',g=n=>m[key(n)]||(m[key(n)]={name:n.trim(),phone:'',total:0,paid:0});
+D.parties.filter(p=>p.type===type).forEach(p=>{g(p.name).phone=p.phone||''});
+(C?D.sales:D.purchases).forEach(x=>{const n=C?x.customer:x.supplier;if(n){const o=g(n);o.total+=x.total;o.paid+=x.paid}});
+D.money.forEach(x=>{if(x.link&&x.party&&x.type===(C?'in':'out'))g(x.party).paid+=x.amount});
+return Object.values(m).map(o=>({...o,total:r2(o.total),paid:r2(o.paid),out:r2(o.total-o.paid)})).sort((a,b)=>b.out-a.out||a.name.localeCompare(b.name))}
+const ensureParty=(n,t)=>{if(n&&!D.parties.some(p=>p.type===t&&key(p.name)===key(n)))D.parties.push({id:uid(),name:n.trim(),phone:'',type:t})};
+function txs(){const a=[];
+D.money.forEach(x=>a.push({id:x.id,k:x.type,date:x.date,type:x.type==='in'?'Money In':'Money Out',desc:x.desc,party:x.party,amt:x.amount,method:x.method,acc:[ac(x.method)],ref:x.ref,sign:x.type==='in'?1:-1}));
+[['purchase',D.purchases,-1,'Purchase','supplier'],['sale',D.sales,1,'Sale','customer']].forEach(([k,L,s,t,pk])=>L.forEach(x=>{const p=prod(x.pid);a.push({id:x.id,k,date:x.date,type:t,desc:(p?p.name:'?')+' × '+x.qty+(x.total>x.paid?' · due '+money(x.total-x.paid):''),party:x[pk],amt:x.total,method:x.paid>0?x.method:'—',acc:x.paid>0?[ac(x.method)]:[],ref:'',sign:s})}));
+D.transfers.forEach(x=>a.push({id:x.id,k:'transfer',date:x.date,type:'Transfer',desc:cap(x.from)+' → '+cap(x.to)+(x.note?' · '+x.note:''),party:'',amt:x.amount,method:'—',acc:[x.from,x.to],ref:'',sign:0}));
+return a.sort((p,q)=>q.date.localeCompare(p.date)||q.id.localeCompare(p.id))}
+/* safe commit: apply change, block negative stock unless overridden, audit, save */
+function commit(fn,msg,pids){const snap=JSON.stringify(D);fn();
+const bad=[...new Set(pids)].filter(id=>prod(id)&&stock(id)<0);
+if(bad.length&&!confirm('Stock would go negative for: '+bad.map(id=>prod(id).name+' ('+n3(stock(id))+')').join(', ')+'.\nAllow negative stock?')){D=JSON.parse(snap);return false}
+D.audit.unshift({t:new Date().toISOString(),m:msg});D.audit.length=Math.min(D.audit.length,500);save();return true}
+const done=ok=>ok?'':'Not saved.';
+/* modal + form helpers */
+const F=(id,l,t,v,x)=>'<label for="f_'+id+'">'+l+'</label>'+(t==='select'?'<select id="f_'+id+'">'+x.map(o=>'<option value="'+esc(o[0])+'"'+(o[0]==v?' selected':'')+'>'+esc(o[1])+'</option>').join('')+'</select>':t==='area'?'<textarea id="f_'+id+'" rows="2">'+esc(v)+'</textarea>':'<input id="f_'+id+'" type="'+t+'" value="'+esc(v)+'"'+(t==='number'?' inputmode="decimal" step="any" min="0"':'')+(x?' list="'+x+'"':'')+' autocomplete="off">');
+function modal(t,h,ok,saveFn,delFn,init){const o=document.createElement('div');o.className='ov';
+o.innerHTML='<div class="modal"><h3>'+t+'</h3>'+h+'<div class="err"></div><div class="mact">'+(delFn?'<button class="btn dng" data-m="del">Delete</button>':'')+'<span class="sp"></span><button class="btn" data-m="x">Cancel</button><button class="btn pri" data-m="ok">'+ok+'</button></div></div>';
+document.body.appendChild(o);const v=id=>o.querySelector('#f_'+id).value,close=()=>o.remove();
+const go=()=>{const e=saveFn(v);if(e)o.querySelector('.err').textContent=e;else{close();render()}};
+o.onclick=e=>{const m=e.target.dataset.m;if(e.target===o||m==='x')close();else if(m==='ok')go();else if(m==='del'&&confirm('Delete this record? Its stock and balance effects will be reversed.')&&delFn()){close();render()}};
+o.onkeydown=e=>{if(e.key==='Escape')close();else if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();go()}};
+init&&init(o);const f=o.querySelector('input,select');f&&f.focus()}
+function moneyForm(type,x,pre){const I=type==='in';x=x||Object.assign({date:today(),method:'Cash'},pre);
+modal((x.id?'Edit ':'')+(I?'Money In':'Money Out'),F('date','Date','date',x.date)+F('amount','Amount','number',x.amount)+F('party',I?'Received from':'Paid to','text',x.party,I?'dc':'ds')+F('desc','Description','text',x.desc)+F('method','Payment method','select',x.method,METH)+F('link','Applies to','select',x.link?'1':'0',[['0','Other (income / expense)'],['1',I?'Customer payment (reduces amount owed to you)':'Supplier payment (reduces amount you owe)']])+F('ref','Reference no. (optional)','text',x.ref),'Save',v=>{
+const amt=r2(num(v('amount'))),party=v('party').trim(),link=v('link')==='1';
+if(!v('date'))return'Enter a date.';if(amt<=0)return'Enter an amount greater than zero.';if(link&&!party)return'Enter the party name.';
+const o={id:x.id||uid(),type,date:v('date'),amount:amt,party,desc:v('desc').trim(),method:v('method'),ref:v('ref').trim(),link};
+return done(commit(()=>{upsert(D.money,o);if(link)ensureParty(party,I?'customer':'supplier')},(x.id?'Edited ':'Added ')+(I?'Money In ':'Money Out ')+money(amt)+' '+party,[]))},
+x.id&&(()=>commit(()=>del(D.money,x.id),'Deleted '+(I?'Money In ':'Money Out ')+money(x.amount)+' '+x.party,[])),
+o=>{const p=o.querySelector('#f_party'),l=o.querySelector('#f_link');p.addEventListener('change',()=>{if(l.value==='0'&&pstats(I?'customer':'supplier').some(s=>key(s.name)===key(p.value)))l.value='1'})})}
+function xferForm(x){x=x||{date:today(),from:'cash',to:'bank'};
+modal((x.id?'Edit ':'')+'Transfer',F('date','Date','date',x.date)+F('dir','Direction','select',x.from+'>'+x.to,[['cash>bank','Cash → Bank'],['bank>cash','Bank → Cash']])+F('amount','Amount','number',x.amount)+F('note','Note (optional)','text',x.note)+'<div class="note">Transfers move money between accounts and are not income or expense.</div>','Save',v=>{
+const amt=r2(num(v('amount')));if(!v('date'))return'Enter a date.';if(amt<=0)return'Enter an amount greater than zero.';
+const d=v('dir').split('>'),o={id:x.id||uid(),date:v('date'),from:d[0],to:d[1],amount:amt,note:v('note').trim()};
+return done(commit(()=>upsert(D.transfers,o),(x.id?'Edited':'Added')+' transfer '+money(amt)+' '+d[0]+' to '+d[1],[]))},
+x.id&&(()=>commit(()=>del(D.transfers,x.id),'Deleted transfer '+money(x.amount),[])))}
+function tradeForm(kind,x){const P=kind==='sale',L=P?'sales':'purchases';
+if(!D.products.length){alert('Add a product in Inventory first.');return}
+const p0=D.products[0];x=x||{date:today(),method:'Cash',pid:p0.id,rate:P?p0.sell:p0.buy};
+const st=x.id?(x.paid>=x.total?'Paid':x.paid>0?'Partial':'Unpaid'):'Paid';
+modal((x.id?'Edit ':'New ')+kind,F('date','Date','date',x.date)+F('party',P?'Customer (optional if fully paid)':'Supplier','text',P?x.customer:x.supplier,P?'dc':'ds')+F('pid','Product','select',x.pid,D.products.map(p=>[p.id,p.name+' ('+p.sku+') · stock '+n3(stock(p.id))+' '+p.unit]))+F('qty','Quantity','number',x.qty)+F('rate','Price per unit','number',x.rate)+'<div class="tot" id="tot"></div>'+F('status','Payment status','select',st,[['Paid','Paid'],['Partial','Partially paid'],['Unpaid','Unpaid']])+'<div id="pw">'+F('paid',P?'Amount received':'Amount paid','number',x.id?x.paid:'')+'</div>'+F('method','Payment method','select',x.method,METH)+F('notes','Notes (optional)','area',x.notes),'Save',v=>{
+const pid=v('pid'),qty=num(v('qty')),rate=num(v('rate')),name=v('party').trim();
+if(!v('date'))return'Enter a date.';if(!prod(pid))return'Choose a product.';if(qty<=0)return'Enter a quantity greater than zero.';
+const total=r2(qty*rate),s=v('status'),paid=s==='Paid'?total:s==='Unpaid'?0:r2(num(v('paid')));
+if(s==='Partial'&&(paid<=0||paid>=total))return'Partial payment must be more than 0 and less than the total.';
+if((!P||paid<total)&&!name)return P?'Enter the customer name for an unpaid or part-paid sale.':'Enter the supplier name.';
+const o={id:x.id||uid(),date:v('date'),pid,qty,rate,total,paid,method:v('method'),notes:v('notes').trim()};o[P?'customer':'supplier']=name;
+return done(commit(()=>{upsert(D[L],o);ensureParty(name,P?'customer':'supplier')},(x.id?'Edited ':'Added ')+kind+' '+prod(pid).name+' × '+qty+' = '+money(total),[pid,x.id?x.pid:pid]))},
+x.id&&(()=>commit(()=>del(D[L],x.id),'Deleted '+kind+' '+money(x.total),[x.pid])),
+o=>{const q=s=>o.querySelector(s),upd=()=>{q('#tot').textContent='Total '+money(num(q('#f_qty').value)*num(q('#f_rate').value));q('#pw').style.display=q('#f_status').value==='Partial'?'':'none'};
+o.addEventListener('input',upd);o.addEventListener('change',upd);
+q('#f_pid').addEventListener('change',()=>{const p=prod(q('#f_pid').value);if(p)q('#f_rate').value=P?p.sell:p.buy;upd()});upd()})}
+function prodForm(x){x=x||{unit:'piece'};
+modal(x.id?'Edit product':'New product',F('name','Product name','text',x.name)+F('sku','Product code / SKU','text',x.sku)+F('desc','Description (optional)','text',x.desc)+F('unit','Unit of measurement','text',x.unit,'du')+F('buy','Purchase price','number',x.buy)+F('sell','Selling price','number',x.sell)+F('open','Opening stock','number',x.open)+F('min','Minimum stock alert level','number',x.min)+(x.id?'<div class="note">Current stock: '+n3(stock(x.id))+' '+esc(x.unit)+' (opening stock + purchases − sales)</div>':''),'Save',v=>{
+const name=v('name').trim(),sku=v('sku').trim();if(!name)return'Enter a product name.';if(!sku)return'Enter a product code.';
+if(D.products.some(p=>p.id!==x.id&&key(p.sku)===key(sku)))return'This product code is already used.';
+const o={id:x.id||uid(),name,sku,desc:v('desc').trim(),unit:v('unit').trim()||'piece',buy:num(v('buy')),sell:num(v('sell')),open:num(v('open')),min:num(v('min'))};
+return done(commit(()=>upsert(D.products,o),(x.id?'Edited':'Added')+' product '+name,[o.id]))},
+x.id&&(()=>{if(D.purchases.some(a=>a.pid===x.id)||D.sales.some(a=>a.pid===x.id)){alert('This product has purchases or sales and cannot be deleted. Delete those records first.');return false}return commit(()=>del(D.products,x.id),'Deleted product '+x.name,[])}))}
+function partyForm(type,x){x=x||{};modal(x.id?esc(x.name):'New '+type,(x.id?'':F('name','Name','text',''))+F('phone','Contact number (optional)','tel',x.phone),'Save',v=>{
+const name=x.id?x.name:v('name').trim();if(!name)return'Enter a name.';if(!x.id&&D.parties.some(p=>p.type===type&&key(p.name)===key(name)))return'This '+type+' already exists.';
+return done(commit(()=>upsert(D.parties,{id:x.id||uid(),name,phone:v('phone').trim(),type}),(x.id?'Edited ':'Added ')+type+' '+name,[]))},
+x.id&&(()=>{const s=pstats(type).find(a=>key(a.name)===key(x.name));if(s&&(s.total||s.paid)){alert('This '+type+' has transactions and cannot be deleted.');return false}return commit(()=>del(D.parties,x.id),'Deleted '+type+' '+x.name,[])}))}
+/* views */
+let TAB='purchase',PT='customer',IQ='',TXF={k:'all',a:'all',q:''};
+const ICO={dashboard:'<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>',transactions:'<path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/>',inventory:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',trade:'<path d="M4 4h16v16l-3-2-3 2-3-2-3 2-4-2zM8 9h8M8 13h8"/>',parties:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6M17 5a3.5 3.5 0 010 7M22 20c0-3-2-5-4-5.5"/>',reports:'<path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-8"/>',settings:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'};
+const NAV=[['dashboard','Dashboard','Home'],['transactions','Transactions','Money'],['inventory','Inventory','Stock'],['trade','Purchases & Sales','Trade'],['parties','Parties','Parties'],['reports','Reports','Reports'],['settings','Settings','Setup']];
+const head=(t,r)=>'<div class="top"><h1>'+t+'</h1><div class="acts">'+(r||'')+'</div></div>';
+const MB='<button class="btn in" data-a="min">+ Money In</button><button class="btn out" data-a="mout">− Money Out</button>';
+const card=(l,v,c,s)=>'<div class="card"><div class="l">'+l+'</div><div class="n '+(c||'')+'">'+v+'</div>'+(s?'<div class="t2">'+s+'</div>':'')+'</div>';
+function vDash(){const b=bal(),[i,o]=flow('dash'),oc=r2(pstats('customer').reduce((s,x)=>s+x.out,0)),os=r2(pstats('supplier').reduce((s,x)=>s+x.out,0)),low=D.products.filter(p=>p.min>0&&stock(p.id)<=p.min),q=D.products.reduce((s,p)=>s+stock(p.id),0);
+return head('Dashboard',MB)+'<h2>Balances now</h2><div class="g">'+card('Total balance',money(b.total))+card('Cash',money(b.cash))+card('Bank / UPI',money(b.bank))+'</div><h2>Money in the period</h2>'+rbar('dash')+'<div class="g">'+card('Total money received',money(i),'gr')+card('Total money paid',money(o),'rd')+'</div><h2>Outstanding</h2><div class="g">'+card('Customers owe you',money(oc))+card('You owe suppliers',money(os))+'</div><h2>Inventory</h2><div class="g">'+card('Different products',D.products.length)+card('Total quantity in stock',n3(q))+card('Stock valuation',money(D.products.reduce((s,p)=>s+stock(p.id)*p.buy,0)))+'</div>'+(low.length?'<h2>Low-stock alerts</h2><div class="list">'+low.map(p=>'<div class="row" data-a="editp" data-x="'+p.id+'"><div class="t1">'+esc(p.name)+'</div><div class="amt rd">'+n3(stock(p.id))+' '+esc(p.unit)+' <span class="t2">(alert at '+p.min+')</span></div></div>').join('')+'</div>':'')}
+function txRows(){let a=txs().filter(x=>inR('tx',x.date));if(TXF.k!=='all')a=a.filter(x=>x.k===TXF.k);if(TXF.a!=='all')a=a.filter(x=>x.acc.includes(TXF.a));
+const q=TXF.q.trim().toLowerCase();if(q)a=a.filter(x=>[x.desc,x.party,x.type,x.method,x.ref,x.date,x.amt].join(' ').toLowerCase().includes(q));
+if(!a.length)return'<div class="empty">No transactions found.</div>';
+return a.slice(0,300).map(x=>'<div class="row" data-a="edit" data-x="'+x.k+':'+x.id+'"><div class="rl"><div class="t1">'+esc(x.party||x.desc||x.type)+'</div><div class="t2">'+fd(x.date)+' · '+x.type+' · '+esc(x.method)+(x.party&&x.desc?' · '+esc(x.desc):'')+(x.ref?' · Ref '+esc(x.ref):'')+'</div></div><div class="amt '+(x.sign>0?'g2':x.sign<0?'r2':'')+'">'+(x.sign>0?'+ ':x.sign<0?'− ':'')+money(x.amt)+'</div></div>').join('')+(a.length>300?'<div class="empty">Showing latest 300. Narrow the filters to see more.</div>':'')}
+function vTx(){const ch=(g,k,l)=>'<button class="chip'+(TXF[g]===k?' on':'')+'" data-a="tf" data-x="'+g+':'+k+'">'+l+'</button>';
+return head('Transactions',MB+'<button class="btn" data-a="xfer">Transfer</button>')+'<div class="chips">'+[['all','All'],['in','Money In'],['out','Money Out'],['purchase','Purchases'],['sale','Sales'],['transfer','Transfers']].map(c=>ch('k',c[0],c[1])).join('')+'</div><div class="chips">'+[['all','All accounts'],['cash','Cash'],['bank','Bank / UPI']].map(c=>ch('a',c[0],c[1])).join('')+'</div>'+rbar('tx')+'<input class="search" data-s="tx" placeholder="Search transactions" value="'+esc(TXF.q)+'"><div class="list" id="txl">'+txRows()+'</div>'}
+function invRows(){const q=IQ.trim().toLowerCase(),L=D.products.filter(p=>!q||(p.name+' '+p.sku+' '+(p.desc||'')).toLowerCase().includes(q));
+if(!L.length)return'<div class="empty">'+(D.products.length?'No matching products.':'No products yet.')+'</div>';
+return L.map(p=>{const s=stock(p.id);return'<div class="row" data-a="editp" data-x="'+p.id+'"><div class="rl"><div class="t1">'+esc(p.name)+(p.min>0&&s<=p.min?'<span class="low">Low stock</span>':'')+'</div><div class="t2">'+esc(p.sku)+' · Buy '+money(p.buy)+' · Sell '+money(p.sell)+'</div></div><div class="amt"><div>'+n3(s)+' '+esc(p.unit)+'</div><div class="t2">'+money(s*p.buy)+'</div></div></div>'}).join('')}
+function vInv(){return head('Inventory','<button class="btn pri" data-a="newp">+ Add product</button>')+'<div class="g">'+card('Products',D.products.length)+card('Total quantity',n3(D.products.reduce((s,p)=>s+stock(p.id),0)))+card('Stock valuation',money(D.products.reduce((s,p)=>s+stock(p.id)*p.buy,0)),'','at purchase price')+'</div><h2>Products</h2><input class="search" data-s="inv" placeholder="Search by name or code" value="'+esc(IQ)+'"><div class="list" id="invl">'+invRows()+'</div>'}
+function vTrade(){const P=TAB==='sale',L=(P?D.sales:D.purchases).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+return head('Purchases & Sales','<button class="btn pri" data-a="newt">+ New '+TAB+'</button>')+'<div class="tabs"><button class="tab'+(P?'':' on')+'" data-a="tab" data-x="purchase">Purchases</button><button class="tab'+(P?' on':'')+'" data-a="tab" data-x="sale">Sales</button></div><div class="list">'+(L.length?L.slice(0,300).map(x=>{const p=prod(x.pid),due=r2(x.total-x.paid);return'<div class="row" data-a="edit" data-x="'+TAB+':'+x.id+'"><div class="rl"><div class="t1">'+esc((P?x.customer:x.supplier)||'Walk-in')+' · '+esc(p?p.name:'?')+'</div><div class="t2">'+fd(x.date)+' · '+n3(x.qty)+' × '+money(x.rate)+(x.paid>0?' · '+esc(x.method):'')+'</div></div><div class="amt"><div>'+money(x.total)+'</div><div class="t2 '+(due>0?'r2':'')+'">'+(due>0?'Due '+money(due):'Paid')+'</div></div></div>'}).join(''):'<div class="empty">No '+TAB+'s recorded yet.</div>')+'</div>'}
+function vParties(){const C=PT==='customer',L=pstats(PT);
+return head('Parties','<button class="btn pri" data-a="newparty">+ Add '+PT+'</button>')+'<div class="tabs"><button class="tab'+(C?' on':'')+'" data-a="ptab" data-x="customer">Customers</button><button class="tab'+(C?'':' on')+'" data-a="ptab" data-x="supplier">Suppliers</button></div><div class="list">'+(L.length?L.map((s,i)=>'<div class="row" data-a="editparty" data-x="'+i+'"><div class="rl"><div class="t1">'+esc(s.name)+'</div><div class="t2">'+(s.phone?esc(s.phone)+' · ':'')+(C?'Sales ':'Purchases ')+money(s.total)+' · '+(C?'Received ':'Paid ')+money(s.paid)+'</div></div><div class="amt"><div class="'+(s.out>0?'r2':'')+'">'+money(s.out)+'</div><div class="t2">outstanding</div><button class="btn sm" data-a="pay" data-x="'+i+'">'+(C?'Record payment received':'Record payment made')+'</button></div></div>').join(''):'<div class="empty">No '+PT+'s yet. They are added automatically from '+(C?'sales':'purchases')+'.</div>')+'</div>'}
+function vRep(){const[i,o]=flow('rep'),S=(L)=>{const f=L.filter(x=>inR('rep',x.date));return[f.length,f.reduce((s,x)=>s+x.qty,0),r2(f.reduce((s,x)=>s+x.total,0)),r2(f.reduce((s,x)=>s+x.paid,0))]},s=S(D.sales),p=S(D.purchases);
+const sm=(t,a,w)=>'<div class="card"><div class="l">'+t+'</div>'+[['Entries',a[0]],['Quantity',n3(a[1])],['Total',money(a[2])],[w,money(a[3])],['Unpaid',money(a[2]-a[3])]].map(r=>'<div class="kv"><span class="l">'+r[0]+'</span><span>'+r[1]+'</span></div>').join('')+'</div>';
+const ol=t=>'<div class="list">'+(pstats(t).filter(x=>x.out!==0).map(x=>'<div class="row" style="cursor:default"><div class="t1">'+esc(x.name)+'</div><div class="amt">'+money(x.out)+'</div></div>').join('')||'<div class="empty">Nothing outstanding.</div>')+'</div>';
+return head('Reports')+rbar('rep')+'<div class="g">'+card('Total money received',money(i),'gr')+card('Total money paid',money(o),'rd')+'</div><h2>Sales &amp; purchases in the period</h2><div class="g">'+sm('Sales summary',s,'Received')+sm('Purchase summary',p,'Paid')+'</div><h2>Current inventory</h2><div class="list">'+(D.products.map(x=>{const q=stock(x.id);return'<div class="row" style="cursor:default"><div class="rl"><div class="t1">'+esc(x.name)+'</div><div class="t2">'+esc(x.sku)+'</div></div><div class="amt"><div>'+n3(q)+' '+esc(x.unit)+'</div><div class="t2">'+money(q*x.buy)+'</div></div></div>'}).join('')||'<div class="empty">No products.</div>')+'</div><h2>Customer outstanding balances</h2>'+ol('customer')+'<h2>Supplier outstanding balances</h2>'+ol('supplier')+'<h2>Export (uses the date filter above for transactions, purchases and sales)</h2><div class="chips">'+['Transactions','Products','Purchases','Sales','Customers','Suppliers'].map(n=>'<button class="chip" data-a="csv" data-x="'+n+'">CSV · '+n+'</button>').join('')+'</div><button class="btn pri" data-a="xls">Excel workbook (all sheets)</button>'}
+function vSet(){return head('Settings')+'<div class="card"><div class="l">Business name</div><input id="s_name" value="'+esc(D.set.name)+'"><div class="l" style="margin-top:12px">Currency symbol</div><input id="s_cur" value="'+esc(D.set.cur)+'" maxlength="4"><div class="l" style="margin-top:12px">Opening cash balance</div><input id="s_oc" type="number" step="any" inputmode="decimal" value="'+D.set.openCash+'"><div class="l" style="margin-top:12px">Opening bank / UPI balance</div><input id="s_ob" type="number" step="any" inputmode="decimal" value="'+D.set.openBank+'"><div class="mact"><button class="btn pri" data-a="sset">Save settings</button></div></div><h2>Backup &amp; restore</h2><div class="note">All data is stored on this device only. Download a backup regularly and keep it somewhere safe.</div><div class="acts"><button class="btn pri" data-a="bak">Download backup</button><label class="btn" style="display:inline-flex;align-items:center">Restore from backup<input id="rf" type="file" accept=".json,application/json" hidden></label><button class="btn dng" data-a="reset">Erase all data</button></div><h2>Audit history</h2><div class="list">'+(D.audit.slice(0,50).map(a=>'<div class="row" style="cursor:default"><div class="t1" style="white-space:normal">'+esc(a.m)+'</div><div class="t2" style="white-space:nowrap">'+new Date(a.t).toLocaleString([],{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</div></div>').join('')||'<div class="empty">No changes recorded yet.</div>')+'</div>'}
+const V={dashboard:vDash,transactions:vTx,inventory:vInv,trade:vTrade,parties:vParties,reports:vRep,settings:vSet};
+function render(){const p=V[location.hash.slice(1)]?location.hash.slice(1):'dashboard';
+$('#nav').innerHTML='<div class="logo">'+esc(D.set.name)+'</div>'+NAV.map(n=>'<a href="#'+n[0]+'"'+(n[0]===p?' class="on"':'')+'><svg viewBox="0 0 24 24">'+ICO[n[0]]+'</svg><span class="lg">'+n[1]+'</span><span class="sh">'+n[2]+'</span></a>').join('');
+const opt=t=>pstats(t).map(s=>'<option value="'+esc(s.name)+'">').join('');$('#dc').innerHTML=opt('customer');$('#ds').innerHTML=opt('supplier');
+$('#app').innerHTML=V[p]()}
+/* export */
+function dl(n,m,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800)}
+function sheets(){const f=a=>a.filter(x=>inR('rep',x.date));return{
+Transactions:[['Date','Type','Description','Party','Amount','Method','Reference']].concat(f(txs()).map(x=>[x.date,x.type,x.desc||'',x.party||'',x.amt,x.method,x.ref||''])),
+Products:[['Name','Code','Description','Unit','Purchase price','Selling price','Opening stock','Current stock','Min alert','Stock value']].concat(D.products.map(p=>[p.name,p.sku,p.desc||'',p.unit,p.buy,p.sell,p.open,stock(p.id),p.min,r2(stock(p.id)*p.buy)])),
+Purchases:[['Date','Supplier','Product','Qty','Rate','Total','Paid','Due','Method','Notes']].concat(f(D.purchases).map(x=>[x.date,x.supplier,(prod(x.pid)||{}).name||'',x.qty,x.rate,x.total,x.paid,r2(x.total-x.paid),x.method,x.notes||''])),
+Sales:[['Date','Customer','Product','Qty','Rate','Total','Received','Due','Method','Notes']].concat(f(D.sales).map(x=>[x.date,x.customer||'',(prod(x.pid)||{}).name||'',x.qty,x.rate,x.total,x.paid,r2(x.total-x.paid),x.method,x.notes||''])),
+Customers:[['Name','Phone','Total sales','Received','Outstanding']].concat(pstats('customer').map(s=>[s.name,s.phone,s.total,s.paid,s.out])),
+Suppliers:[['Name','Phone','Total purchases','Paid','Outstanding']].concat(pstats('supplier').map(s=>[s.name,s.phone,s.total,s.paid,s.out]))}}
+const csv=a=>'\ufeff'+a.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+const xls=S=>'<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'+Object.keys(S).map(n=>'<Worksheet ss:Name="'+n+'"><Table>'+S[n].map(r=>'<Row>'+r.map(c=>typeof c==='number'?'<Cell><Data ss:Type="Number">'+c+'</Data></Cell>':'<Cell><Data ss:Type="String">'+esc(c)+'</Data></Cell>').join('')+'</Row>').join('')+'</Table></Worksheet>').join('')+'</Workbook>';
+/* events */
+document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;const A=a.dataset.a,X=a.dataset.x;
+if(A==='min')moneyForm('in');else if(A==='mout')moneyForm('out');else if(A==='xfer')xferForm();
+else if(A==='rng'){const[k,m]=X.split(':');R[k].m=m;render()}
+else if(A==='tf'){const[g,k]=X.split(':');TXF[g]=k;render()}
+else if(A==='tab'){TAB=X;render()}else if(A==='ptab'){PT=X;render()}
+else if(A==='newt')tradeForm(TAB);else if(A==='newp')prodForm();else if(A==='editp')prodForm(prod(X));
+else if(A==='newparty')partyForm(PT);
+else if(A==='editparty'){const s=pstats(PT)[+X];partyForm(PT,D.parties.find(p=>p.type===PT&&key(p.name)===key(s.name))||{name:s.name,phone:''})}
+else if(A==='pay'){const s=pstats(PT)[+X];moneyForm(PT==='customer'?'in':'out',null,{party:s.name,link:true,amount:s.out>0?s.out:''})}
+else if(A==='edit'){const[k,id]=X.split(':'),L={in:'money',out:'money',purchase:'purchases',sale:'sales',transfer:'transfers'}[k],x=D[L].find(z=>z.id===id);if(!x)return;k==='in'||k==='out'?moneyForm(k,x):k==='transfer'?xferForm(x):tradeForm(k,x)}
+else if(A==='csv'){const s=sheets()[X];dl('ledger-'+X.toLowerCase()+'-'+today()+'.csv','text/csv',csv(s))}
+else if(A==='xls')dl('ledger-'+today()+'.xls','application/vnd.ms-excel',xls(sheets()));
+else if(A==='sset'){D.set.name=$('#s_name').value.trim()||'My Business';D.set.cur=$('#s_cur').value.trim()||'₹';D.set.openCash=num($('#s_oc').value);D.set.openBank=num($('#s_ob').value);D.audit.unshift({t:new Date().toISOString(),m:'Updated settings / opening balances'});save();render()}
+else if(A==='bak')dl('ledger-backup-'+today()+'.json','application/json',JSON.stringify(D));
+else if(A==='reset'&&prompt('This erases everything on this device. Type DELETE to confirm.')==='DELETE'){D=blank();save();render()}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset.s==='tx'){TXF.q=t.value;$('#txl').innerHTML=txRows()}else if(t.dataset.s==='inv'){IQ=t.value;$('#invl').innerHTML=invRows()}});
+document.addEventListener('change',e=>{const t=e.target;
+if(t.dataset.rf){const[k,f]=t.dataset.rf.split(':');R[k][f]=t.value;render()}
+else if(t.id==='rf'&&t.files[0]){const fr=new FileReader();fr.onload=()=>{try{const j=JSON.parse(fr.result);if(!Array.isArray(j.products)||!Array.isArray(j.money))throw 0;if(confirm('Replace all current data with this backup?')){D=Object.assign(blank(),j);save();render()}}catch(x){alert('This file is not a valid backup.')}};fr.readAsText(t.files[0]);t.value=''}});
+window.addEventListener('hashchange',()=>{render();scrollTo(0,0)});
+render();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
